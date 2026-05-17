@@ -65,7 +65,7 @@ Cardinal-Rule reminders: <project-specific guardrails from L0>
 
 ```
 <project-root>/
-├── CLAUDE.md                              # L0 (already exists in most Justin projects)
+├── CLAUDE.md                              # L0 (typically already exists in the project)
 ├── workspace/
 │   ├── CONTEXT.md                         # L1 — entry router
 │   ├── stages/                            # L2 — numbered + verb folders
@@ -148,7 +148,7 @@ After the user answers, propose 3–7 numbered stages with verb names. Examples 
 - **Content / writing project** → `01-research`, `02-outline`, `03-draft`, `04-edit`, `05-publish`
 - **Web app / feature build** → `01-design`, `02-implement`, `03-test`, `04-deploy`
 - **ML / data pipeline** → `01-ingest`, `02-clean`, `03-train`, `04-evaluate`, `05-serve`
-- **Scraper / extraction** → `00-onboard`, `00c-egress`, `01-fingerprint`, `02-recon`, `03-extract`, `04-verify`, `05-long-tail` (see sg-dealer-scraper)
+- **Scraper / extraction** → `00-onboard`, `00c-egress`, `01-fingerprint`, `02-recon`, `03-extract`, `04-verify`, `05-long-tail`
 - **Marketing / launch** → `01-positioning`, `02-creative`, `03-channels`, `04-launch`, `05-iterate`
 - **Research / analysis** → `01-scope`, `02-gather`, `03-analyze`, `04-synthesize`, `05-report`
 
