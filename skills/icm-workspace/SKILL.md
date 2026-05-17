@@ -1,6 +1,6 @@
 ---
 name: icm-workspace
-description: Interpretable Context Methodology (ICM / Model Workspace Protocol) — filesystem-based agent orchestration via a 5-layer markdown hierarchy and numbered stage folders with Inputs/Process/Outputs contracts. Use when (1) a project contains a `workspace/CONTEXT.md` file — always read it first, (2) the user says any of: "set up ICM", "let's use ICM", "use ICM here", "scaffold a workspace", "scaffold this project", "organize this project with stages", "structure this project", "set up stages", "I want a workspace here", "add a stage", "add an instance / brand / tenant / client", "onboard a brand", (3) you're entering a multi-stage or multi-instance project that needs structured agent navigation, (4) the user asks for "consistent project structure" or "the same shape across projects". Plugs into the existing skill-router preflight without replacing it. Reference paper arxiv 2603.16021 by Jake Van Clief.
+description: Interpretable Context Methodology (ICM / Model Workspace Protocol) — filesystem-based agent orchestration via a 5-layer markdown hierarchy and numbered stage folders with Inputs/Process/Outputs contracts. Generic across project types — works equally for platforms, web apps, mobile apps, tools, content workflows, marketing campaigns, ML pipelines, research projects, and data/extraction systems. Use when (1) a project contains a `workspace/CONTEXT.md` file — always read it first, (2) the user says any of: "set up ICM", "let's use ICM", "use ICM here", "scaffold a workspace", "scaffold this project", "organize this project with stages", "structure this project", "set up stages", "I want a workspace here", "add a stage", "add an instance", "add a tenant / client / brand / environment", "onboard an instance", (3) you're entering a multi-stage or multi-instance project that needs structured agent navigation, (4) the user asks for "consistent project structure" or "the same shape across projects". Plugs into the existing skill-router preflight without replacing it. Reference paper arxiv 2603.16021 by Jake Van Clief.
 ---
 
 # ICM Workspace — Interpretable Context Methodology
@@ -11,7 +11,7 @@ A filesystem-based orchestration pattern. Files *are* the orchestration: a 5-lay
 
 - You opened a session in a directory and notice a `workspace/CONTEXT.md` exists at the project root. **Read it first**, then continue per the read-order rule below.
 - The user asks to scaffold ICM structure, add a stage, add an instance (brand/tenant/client/model), or navigate an existing workspace.
-- A project has clear sequenced work (research → draft → publish, or onboard → fingerprint → recon → verify, etc.) or runs the same pipeline across multiple instances.
+- A project has clear sequenced work (research → draft → publish, or discover → design → build → ship → measure, or ingest → clean → train → evaluate → serve, etc.) or runs the same pipeline across multiple instances.
 
 ## The 5 layers
 
@@ -107,8 +107,15 @@ Per-instance sub-orchestrator (workspace/instances/<id>/orchestrator.md)
     passing instance identity. Reports status in instance CONTEXT.md.
 
 Role agents (workspace/agents/<role>.md)
-└── One capability, instance-parameterized (extractor, analyst, uploader,
-    monitor, etc.). Sub-orchestrator passes instance context at invocation.
+└── One capability per agent, instance-parameterized. Role names depend on
+    project type — examples:
+      • content/writing:  researcher, drafter, editor, publisher
+      • web/app/platform: designer, implementer, tester, deployer
+      • marketing/launch: strategist, copywriter, channel-manager, analyst
+      • ML/data pipeline: ingester, trainer, evaluator, deployer
+      • research:         scoper, gatherer, analyzer, reporter
+      • data/extraction:  extractor, validator, uploader, monitor
+    Sub-orchestrator passes instance context at invocation.
     Always obeys the read-order invariant above.
 ```
 
@@ -120,7 +127,7 @@ All three tiers use the standard agent frontmatter (`name`, `description`, `mode
 
 - **Stage folders**: `NN-<verb>/` — numbered + verb. Sub-phases use letter suffix (`00c-egress/`). Numbers encode order; verb keeps `ls` output readable.
 - **Instance folders**: project-specific noun (`brands/`, `clients/`, `tenants/`). Each instance is a single `<id>/` directory with `CONTEXT.md` + `orchestrator.md`.
-- **Role agents**: kebab-case capability name (`extractor.md`, `data-puller.md`, `fni-lens.md`).
+- **Role agents**: kebab-case capability name describing what the agent *does*, not the implementation. E.g. `researcher.md`, `designer.md`, `reviewer.md`, `deployer.md`, `analyst.md`. Use the verbs that match your project's actual work.
 - **L0 location**: `CLAUDE.md` stays at project root — never inside `workspace/`. It's the discovery anchor.
 - **L3 references**: `_config/` for declarative (YAML, JSON, env templates); `shared/` for prose references (playbooks, glossaries, infra docs). Use **symlinks** to existing in-project paths — don't duplicate.
 - **L4 outputs**: always under `workspace/stages/NN-<verb>/output/`. Never write artifacts elsewhere from a stage agent.
@@ -148,7 +155,7 @@ After the user answers, propose 3–7 numbered stages with verb names. Examples 
 - **Content / writing project** → `01-research`, `02-outline`, `03-draft`, `04-edit`, `05-publish`
 - **Web app / feature build** → `01-design`, `02-implement`, `03-test`, `04-deploy`
 - **ML / data pipeline** → `01-ingest`, `02-clean`, `03-train`, `04-evaluate`, `05-serve`
-- **Scraper / extraction** → `00-onboard`, `00c-egress`, `01-fingerprint`, `02-recon`, `03-extract`, `04-verify`, `05-long-tail`
+- **Data / extraction pipeline** → `01-discover`, `02-extract`, `03-validate`, `04-publish`, `05-iterate`
 - **Marketing / launch** → `01-positioning`, `02-creative`, `03-channels`, `04-launch`, `05-iterate`
 - **Research / analysis** → `01-scope`, `02-gather`, `03-analyze`, `04-synthesize`, `05-report`
 
@@ -179,8 +186,11 @@ Use the companion slash command:
 
 ```
 /icm-init --stages "01-research,02-draft,03-publish"
-/icm-init --stages "00-onboard,01-fingerprint,02-recon,03-verify" --instances brands
+/icm-init --stages "01-design,02-implement,03-test,04-deploy"
+/icm-init --stages "01-research,02-strategy,03-creative,04-launch,05-measure" --instances clients
 ```
+
+The `--instances <noun>` argument accepts any noun that fits the project — `clients`, `tenants`, `brands`, `models`, `environments`, `regions`, etc.
 
 The command is idempotent (skip-if-exists) and detects existing `config/` + `docs/` directories, offering to symlink them into `_config/` and `shared/`. See `~/.claude/commands/icm-init.md` for arguments.
 

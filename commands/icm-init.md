@@ -186,9 +186,9 @@ workspace/                                  [created]
 ├── _config/README.md                       [created]
 ├── shared/README.md                        [created]
 ├── agents/README.md                        [created]
-└── brands/_template/                       [created — --instances brands]
-    ├── CONTEXT.md                          [created]
-    └── orchestrator.md                     [created]
+└── <noun>/_template/                       [created — only if --instances <noun> was passed;
+    ├── CONTEXT.md                          [created]   <noun> is whatever the user chose:
+    └── orchestrator.md                     [created]   clients, tenants, brands, models, etc.]
 ```
 
 Then suggest next steps:
