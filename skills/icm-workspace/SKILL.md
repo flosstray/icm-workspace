@@ -132,6 +132,22 @@ All three tiers use the standard agent frontmatter (`name`, `description`, `mode
 - **L3 references**: `_config/` for declarative (YAML, JSON, env templates); `shared/` for prose references (playbooks, glossaries, infra docs). Use **symlinks** to existing in-project paths — don't duplicate.
 - **L4 outputs**: always under `workspace/stages/NN-<verb>/output/`. Never write artifacts elsewhere from a stage agent.
 
+## Discoverability marker (recommended)
+
+Because `workspace/` sorts alphabetically (often at the bottom of Finder views, after `apps/`, `config/`, `docs/`, etc.), a fresh visitor scanning a repo's root may not realize ICM is in play. Counter this with a single visibility-marker file at the project root:
+
+**File:** `0-START-HERE.md` (the `0-` prefix forces it to sort above all letters in case-insensitive Finder sort, appearing right after dotfiles)
+
+**Contents:** A one-page banner that:
+- Explains the two-layer model (navigation in `workspace/`, implementation everywhere else)
+- Routes new sessions: `CLAUDE.md` (L0) → `workspace/CONTEXT.md` (L1) → instance/stage CONTEXTs
+- Lists common operations and where to find them (run a brand's cycle, onboard new instance, refresh status, etc.)
+- Links to the ICM skill, share bundle, and reference paper
+
+The marker file is **purely additive and non-breaking** — it doesn't change any code, config, or existing doc. Reversible via `rm 0-START-HERE.md`. The `/icm-init` command scaffolds it by default; pass `--no-marker` to skip if not wanted.
+
+**Why not just rename `workspace/` to `0-workspace/`?** Tempting (would put it visually first), but renaming breaks the ICM convention used by every stage's relative paths, the orchestrator agents, and cross-project consistency. The marker file is the safer trade — same outcome (ICM is the first thing anyone sees), zero structural risk.
+
 ## Onboarding conversation (when the user uses natural language)
 
 If the user invokes ICM with natural language ("let's use ICM here", "set up ICM for this project", "I want to organize this with stages") and the current project does **not** have `workspace/CONTEXT.md` yet, **do not** run `/icm-init` immediately. Conduct a brief intake first — three short questions, max — then propose the scaffold, get a one-word "go", and run the command.

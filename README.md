@@ -96,6 +96,12 @@ Claude will:
 - **If you can't articulate the verb for a stage, it's not a stage yet.**
 - **Instances**: only add if you'll have 3+ of the same thing (brands, clients, tenants, environments, models). Two isn't worth the template overhead; eight is.
 
+### Discoverability marker
+
+`/icm-init` scaffolds a **`0-START-HERE.md`** at the project root by default. Because filenames starting with `0-` sort above all letters in case-insensitive Finder/file-explorer views, this file appears immediately after dotfiles — making the ICM layer the first visible thing anyone sees when they open the project.
+
+The marker explains the two-layer model (navigation in `workspace/` vs implementation everywhere else), points new sessions to the right read order, and lists common operations. Purely additive and non-breaking; pass `--no-marker` to skip it.
+
 ---
 
 ## Using ICM on an EXISTING project (safely)
