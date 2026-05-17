@@ -148,6 +148,71 @@ The marker file is **purely additive and non-breaking** — it doesn't change an
 
 **Why not just rename `workspace/` to `0-workspace/`?** Tempting (would put it visually first), but renaming breaks the ICM convention used by every stage's relative paths, the orchestrator agents, and cross-project consistency. The marker file is the safer trade — same outcome (ICM is the first thing anyone sees), zero structural risk.
 
+## CLAUDE.md banner (required for existing-project migrations)
+
+For existing projects with a pre-ICM `CLAUDE.md`, the visibility marker alone isn't enough — sessions read `CLAUDE.md` first and follow whatever read-order it specifies. If `CLAUDE.md` doesn't route to the ICM layer, sessions never see it.
+
+**Fix:** prepend this banner at the top of the project's `CLAUDE.md` (right after the H1 title):
+
+```markdown
+> 📍 **This project uses ICM (Interpretable Context Methodology).**
+> **Read order — start here, every session:**
+> 1. [`0-START-HERE.md`](0-START-HERE.md) — visibility marker + two-layer model
+> 2. [`workspace/CONTEXT.md`](workspace/CONTEXT.md) — L1 router (stages, instances, agents)
+> 3. For instance-specific work: `workspace/<instances>/<id>/CONTEXT.md` → its `orchestrator.md`
+> 4. For stage-specific work: `workspace/stages/<NN-verb>/CONTEXT.md`
+> 5. **Then the operational rules below remain authoritative.**
+```
+
+`/icm-init` auto-applies this banner when it detects an existing `CLAUDE.md`. New projects starting with `/icm-init` get the banner as part of the scaffold.
+
+## Update routing — where do new rules go?
+
+When the user adds a rule, convention, or invariant, classify its scope and write to exactly one file. The routing table:
+
+| Scope of the new rule | Destination |
+|---|---|
+| Applies to all instances and all stages | `CLAUDE.md` at project root (L0) |
+| Applies across all instances within ICM navigation | `workspace/CONTEXT.md` (L1) |
+| Instance-specific (e.g., this brand only, this client only) | `workspace/instances/<id>/orchestrator.md` § Instance-specific invariants |
+| Instance status fact (cron slot, ID, wrapper path) | `workspace/instances/<id>/CONTEXT.md` § Brand/instance configuration |
+| Stage-specific (e.g., stage 04 rules across all instances) | `workspace/stages/<NN-verb>/CONTEXT.md` § Cardinal-Rule reminders |
+| Role-agent capability tweak | `workspace/agents/<role>.md` body |
+| Stage process step change | `workspace/stages/<NN-verb>/CONTEXT.md` § Process |
+| Production data (latest snap, etc.) | Auto-synced by a project-specific script — don't hand-edit |
+| Extraction pattern / domain knowledge | Project-specific (e.g. `docs/agents/extraction_patterns/<slug>.md`); reference via `workspace/shared/` symlinks |
+
+**Protocol (4 steps) for any rule/instruction update:**
+
+1. **Classify scope.** Cross-instance? Instance-specific? Stage-specific? Role-specific?
+2. **Locate the destination** from the table above.
+3. **Surface to the user**: *"Filing this under `<file>:<section>`. OK?"*
+4. **Write** only after the user confirms (or skip the confirm step if the user explicitly said "go" / "do it").
+
+After writing, briefly tell the user where the rule landed so they can verify in version control later.
+
+**Natural-language triggers that activate this protocol:**
+- "add a rule for X"
+- "document that Y needs to Z"
+- "remember for brand/client/tenant X"
+- "new convention for stage NN"
+- "going forward, all instances must..."
+- "from now on, this stage requires..."
+- "update the invariants for X"
+
+## Pre-commit validator (recommended)
+
+Pair the workspace with a validator script that enforces:
+- Every stage `CONTEXT.md` has required sections (`## Inputs / ## Process / ## Outputs`)
+- Every Output appears as a later Input or is marked `terminal`
+- All symlinks under `workspace/` resolve
+- Every instance directory has both `CONTEXT.md` and `orchestrator.md`
+- Every agent file has required YAML frontmatter
+
+Implementation: a Python script at `scripts/validate_workspace.py` invoked by a git pre-commit hook (auto-installed via a `make install-hooks` target). Catches schema drift before it lands.
+
+Reference implementation: https://github.com/flosstray/icm-workspace (or look at sg-dealer-scraper's `scripts/validate_workspace.py` for a working example).
+
 ## Onboarding conversation (when the user uses natural language)
 
 If the user invokes ICM with natural language ("let's use ICM here", "set up ICM for this project", "I want to organize this with stages") and the current project does **not** have `workspace/CONTEXT.md` yet, **do not** run `/icm-init` immediately. Conduct a brief intake first — three short questions, max — then propose the scaffold, get a one-word "go", and run the command.

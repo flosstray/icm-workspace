@@ -24,6 +24,7 @@ If `--stages` is missing, print usage and stop.
 1. Confirm working directory contains `CLAUDE.md` at root (L0). If missing, print a warning — the user can still proceed but L0 anchoring is recommended.
 2. Confirm `workspace/` doesn't already exist. If it does, switch to **additive mode** — only create missing pieces, never overwrite existing files. Report every file as `[created]` or `[skipped — exists]`.
 3. Run `git status` if in a git repo. If there are staged or unstaged changes affecting `workspace/`, stop and ask the user to commit or stash first.
+4. If a `CLAUDE.md` exists, check whether it already contains the ICM routing banner. If not, prompt the user to allow patching it (see "CLAUDE.md banner patch" below).
 
 ## Files to create
 
@@ -111,6 +112,29 @@ stages this role operates in.
 For a project with instances: write `master-orchestrator.md` here; per-instance
 sub-orchestrators live in `../instances/<id>/orchestrator.md`.
 ```
+
+### CLAUDE.md banner patch — required for existing-project migrations
+
+If a `CLAUDE.md` exists at the project root, check whether it already starts with an ICM routing banner (look for the string `📍 **This project uses ICM`). If not, prompt the user:
+
+> *"Found existing CLAUDE.md at project root. Without an ICM routing banner there, sessions reading CLAUDE.md may bypass the workspace/ layer entirely (this is a known failure mode). Patch CLAUDE.md to prepend the standard ICM banner? It's a 7-line additive change at the top — existing content stays exactly as it is. Reply `y` to patch, `n` to skip."*
+
+If user replies `y`, prepend this block after the H1 title (the first `# ` line):
+
+```markdown
+> 📍 **This project uses ICM (Interpretable Context Methodology).**
+> **Read order — start here, every session:**
+> 1. [`0-START-HERE.md`](0-START-HERE.md) — visibility marker + two-layer model
+> 2. [`workspace/CONTEXT.md`](workspace/CONTEXT.md) — L1 router (stages, instances, agents)
+> 3. For instance-specific work: `workspace/<noun>/<id>/CONTEXT.md` → its `orchestrator.md`
+> 4. For stage-specific work: `workspace/stages/<NN-verb>/CONTEXT.md`
+> 5. **Then the operational rules below remain authoritative.**
+
+```
+
+Replace `<noun>` with the actual `--instances` value if provided (e.g. `brands`, `clients`). If `--instances` was not passed, drop line 3 of the banner.
+
+**Failure handling:** if the CLAUDE.md doesn't have a clean H1 title to insert after, surface the issue to the user and ask them to position the banner manually. Don't write a malformed file.
 
 ### `0-START-HERE.md` (visibility marker at project root) — UNLESS `--no-marker` was passed
 

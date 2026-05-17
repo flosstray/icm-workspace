@@ -102,6 +102,40 @@ Claude will:
 
 The marker explains the two-layer model (navigation in `workspace/` vs implementation everywhere else), points new sessions to the right read order, and lists common operations. Purely additive and non-breaking; pass `--no-marker` to skip it.
 
+### CLAUDE.md banner (critical for existing projects)
+
+The visibility marker handles Finder views. But **inside a Claude session**, the project's `CLAUDE.md` is the most authoritative routing source — if a pre-ICM `CLAUDE.md` has its own "before any work read these in order" list that doesn't mention `workspace/`, the session will follow that list and ignore ICM entirely.
+
+When `/icm-init` runs against an existing project, it detects the existing `CLAUDE.md`, prompts the user, and (with consent) prepends a 7-line routing banner right after the H1 title. The banner directs sessions to `0-START-HERE.md` → `workspace/CONTEXT.md` → instance/stage CONTEXTs **before** the project's own rules. All existing content stays.
+
+This is the difference between ICM being *technically present* and ICM being *actually used*. Highly recommended for any existing-project migration.
+
+### Update routing (where do new rules go?)
+
+When a session is asked to add a new rule or invariant, the skill consults a destination table to route the update:
+
+| Scope of the rule | Destination |
+|---|---|
+| Cross-instance, cross-stage | `CLAUDE.md` at root (L0) |
+| Cross-instance within ICM | `workspace/CONTEXT.md` (L1) |
+| Instance-specific | `workspace/instances/<id>/orchestrator.md` § Instance-specific invariants |
+| Instance static fact (cron, ID, path) | `workspace/instances/<id>/CONTEXT.md` § Brand/instance configuration |
+| Stage-specific (cross-instance) | `workspace/stages/<NN-verb>/CONTEXT.md` § Cardinal-Rule reminders |
+| Role-agent capability | `workspace/agents/<role>.md` body |
+
+The skill surfaces the destination to the user before writing. Stops rules from drifting into arbitrary files.
+
+### Pre-commit validator (reference impl available)
+
+A validator script (`scripts/validate_workspace.py`) checks:
+- Stage contract schema (required sections)
+- Output → later Input chain integrity
+- Symlink resolution
+- Instance directory completeness
+- Agent file frontmatter
+
+Wire it into a git pre-commit hook so workspace integrity can't regress silently. See sg-dealer-scraper's `scripts/validate_workspace.py` and `Makefile` (`make install-hooks` target) for a working pattern.
+
 ---
 
 ## Using ICM on an EXISTING project (safely)
